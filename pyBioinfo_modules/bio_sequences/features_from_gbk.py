@@ -10,8 +10,9 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from pyBioinfo_modules.basic.decompress import decompFileIfCompressed
-from pyBioinfo_modules.bio_sequences.bio_seq_file_extensions import \
-    GBK_EXTENSIONS
+from pyBioinfo_modules.bio_sequences.bio_seq_file_extensions import (
+    GBK_EXTENSIONS,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -167,7 +168,9 @@ def getCdsFromGbk(gbkPath: Path, getIdFrom=None) -> Path:
     return _getFeatureFromGbk(gbkPath, targetFeature="cds", getIdFrom=getIdFrom)
 
 
-def get_target_region(region = None, gene = None, flanking = None, genome_with_annotation = None):
+def get_target_region(
+    region=None, gene=None, flanking=None, genome_with_annotation=None
+):
     """
     Determine the target region based on the provided arguments.
     This function calculates the start and end positions of a target region
@@ -186,9 +189,18 @@ def get_target_region(region = None, gene = None, flanking = None, genome_with_a
         ValueError: If the region format is invalid.
     """
 
-    assert genome_with_annotation is not None, "Genome with annotation is required."
+    # assert (
+    #     genome_with_annotation is not None
+    # ), "Genome with annotation is required."
+    if genome_with_annotation is None:
+        assert region is not None, (
+            "When genome_with_annotation is not provided, --region is required."
+            " Gene cannot be used without genome annotation."
+        )
     if gene is None:
-        assert region is not None, "When plotting a gene, --flanking is required."
+        assert (
+            region is not None
+        ), "When plotting a gene, --flanking is required."
         if flanking is None:
             flanking = 1500
             log.warning(
@@ -229,10 +241,7 @@ def get_target_region(region = None, gene = None, flanking = None, genome_with_a
     elif gene:
         # Find the start of the gene
         for feature in genome_with_annotation.features:
-            if (
-                feature.type == "gene"
-                and feature.qualifiers["gene"][0] == gene
-            ):
+            if feature.type == "gene" and feature.qualifiers["gene"][0] == gene:
                 if feature.location.strand == -1:
                     gene_start = int(feature.location.end)
                 else:
